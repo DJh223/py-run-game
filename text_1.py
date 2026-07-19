@@ -11,17 +11,15 @@ dtime = 0
 running = True
 on_ground = True
 
-
-player_rect = pg.Rect(200, 310, 40, 40)                 #角色的 y 坐标
+player_y = 310.0                                        #浮点坐标
+player_rect = pg.Rect(200, int(player_y), 40, 40)       #角色的 y 坐标
 player_vy = 0                                           #垂直速度
-ground_y  = 350                                         #地面的 y 坐标
 g_current = 1500                                        #当前实际重力，初始等于正常值
 g_normal = 1500                                         #重力加速度
 g_min = 600                                             #长按最低降到这个值
 g_fade = 3000                                           #每秒重力减少 3000
 hold_threshold = 0.08                                   #过了这个时间才减重力
 base_jump = -550                                        #跳跃力度
-hold_boost = -250                                       #长按额外上升力
 hold_triggered = False                                  #这一跳是否已经触发过长按
 hold_threshold = 0.08                                   #按住0.08秒后才触发长按
 hold_time   = 0                                         #当前已按住多少秒
@@ -41,25 +39,36 @@ while running:
     dtime += dt
 
     #重力
-    if not on_ground and hold_triggered:
-        g_current -= g_fade * dt
-        if g_current < g_min:
-            g_current = g_min
-    else:
-        g_current = g_normal
+    if not on_ground:
+    # 长按轻重力
+        if hold_triggered:
+            g_current -= g_fade * dt
+            if g_current < g_min:
+                g_current = g_min
+        else:
+            g_current = g_normal
 
-    player_vy += g_current * dt
+        player_vy += g_current * dt
 
 
 
     #位置
-    player_rect.bottom  += player_vy * dt
+    old_bottom = player_rect.bottom
 
-    #落地
-    if player_rect.bottom >= ground_y:
-        player_rect.bottom = ground_y
-        player_vy = 0
-        on_ground = True
+    player_y += player_vy * dt
+    player_rect.y = int(player_y)
+
+    on_ground = False
+    for plat in platforms:
+        if old_bottom <= plat.top and player_rect.bottom >= plat.top and player_vy >= 0:
+            player_vy = 0
+            player_rect.bottom = plat.top
+            player_y = player_rect.y
+            on_ground = True
+            break
+        
+
+
 
     #跳跃
     #长按
