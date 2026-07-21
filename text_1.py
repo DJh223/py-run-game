@@ -5,22 +5,27 @@ import ctypes
 
 
 pg.init()
+
+
+#锁定输入法
 try:
     ctypes.windll.imm32.ImmDisableIME(-1)
 except Exception:
     pass   # 非 Windows 系统忽略
+
+
 screen = pg.display.set_mode((800,400))
 clock  = pg.time.Clock()
 
 
 
-dtime = 0                                               #帧时间
+dtime = 0                                               #总时间
 
 
 
 running = True                                          #运行
 
-
+newx = 1000                                             #平台的最右边
 
 on_ground = True                                        #是否在地面 
 player_y = 310.0                                        #角色的 y 坐标
@@ -56,11 +61,32 @@ speed_change = 200                                      #每秒速度变化量�
 
 
 
-move_A = False                                         #A键是否按住
-move_D = False                                         #D键是否按住
+move_A = False                                          #A键是否按住
+move_D = False                                          #D键是否按住
+
+
+
+distance = 0                                            #移动距离
+pixel_score = 10                                        #每跑 100 像素得 1 分
+score = 0                                               #得分
+
+
+
+coins = []                                              #存所有金币
+find_coin = False                                       #是否生成金币
+
 
 
 player_rect = pg.Rect(int(player_x), int(player_y), 40, 40) #方块的初始位置
+
+
+
+font = pg.font.Font(None,36)
+
+
+
+
+
 
 #初始生成几个平台铺满地面
 for i in range (10):
@@ -72,6 +98,26 @@ while running:
     #时间
     dt = clock.tick(120) / 1000
     dtime += dt
+    
+
+    
+
+        
+    #金币随平台滚动
+    for coin in coins:
+        coin.x -= scroll_speed * dt
+
+    # 移出屏幕的删掉
+    coins = [c for c in coins if c.right > 0]
+
+    #拾取金币
+    for coin in coins[:]:      # [:] 拷贝遍历，允许原地删除
+        if player_rect.colliderect(coin):
+            coins.remove(coin)
+            distance += 500
+
+
+
 
     #重力
     if not on_ground:
@@ -129,6 +175,17 @@ while running:
         newplat = pg.Rect(newx, 350, 100, 20)
         platforms.append(newplat)
 
+
+        # 25% 概率在平台上放一个金币
+        if random.random() < 0.40 and series_ground and not find_coin:
+            coin_x = newx + random.randint(10, 80)
+            coin_y = 350 - 20
+            coins.append(pg.Rect(coin_x, coin_y, 12, 12))
+            find_coin = True
+        else:
+            find_coin = False
+
+
         #生成浮空平台
         if random.random() < 0.08 and series_ground and series_float:
             float_y = 230
@@ -178,8 +235,11 @@ while running:
         
 
 
+    #分数
+    distance += scroll_speed * dt
+    score = int(distance / pixel_score)
 
-    print(f"\r A:{keys[pg.K_a]} D:{keys[pg.K_d]} x:{player_rect.x:.0f} scroll:{scroll_speed:.0f}", end="")
+    
 
     #ESC 退出
     for event in pg.event.get():
@@ -214,6 +274,15 @@ while running:
     pg.draw.rect(screen, (178, 139, 213), (int(player_rect.x), int(player_rect.y), 40, 40))
     for plat in platforms:
         pg.draw.rect(screen, (0, 0, 0), plat) 
+
+    #分数
+    figure = font.render(str(score),True,(255, 223, 127))
+    screen.blit(figure,(screen.get_width() - figure.get_width() - 10,10))
+
+
+    #金币
+    for coin in coins:
+        pg.draw.rect(screen, (255, 215, 0), coin)    # 金色
 
 
     pg.display.flip()
