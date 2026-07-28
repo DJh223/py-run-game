@@ -14,6 +14,7 @@ from world import World
 # ============================================================
 pg.init()
 
+# 锁定中文输入法，防止字母键被拦截
 try:
     ctypes.windll.imm32.ImmDisableIME(-1)
 except Exception:
@@ -21,18 +22,18 @@ except Exception:
 
 screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pg.time.Clock()
-font = pg.font.Font(None, 36)
+font = pg.font.Font(None, 36)                              # 分数字体
 
 player = Player()
 camera = Camera()
 world = World()
 
-dtime = 0.0
-distance = 0.0
-move_A = False
-move_D = False
+dtime = 0.0                                                 # 总运行时间
+distance = 0.0                                              # 累计移动距离
+move_A = False                                              # A 键是否按住
+move_D = False                                              # D 键是否按住
 
-running = True
+running = True                                              # 主循环开关
 
 # ============================================================
 # 主循环
@@ -87,6 +88,7 @@ while running:
     player.draw(screen, camera.y)
     world.draw(screen, camera.y)
 
+    # 分数（右上角）
     figure = font.render(str(score), True, (255, 223, 127))
     screen.blit(figure, (screen.get_width() - figure.get_width() - 10, 10))
 
