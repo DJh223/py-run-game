@@ -23,9 +23,11 @@ class World:
 
         self._rightmost = 1000                              # 当前最右边平台的右边缘
 
+        self.total_scroll = 0.0
+
         # 初始生成 10 个连续地面平台
         for i in range(10):
-            self.platforms.append(pg.Rect(i * 100, self.ground_y, 100, 20))
+            self.platforms.append(pg.Rect(i * 100, self.ground_y, SCROLL_W, SCROLL_H))
 
     def update_speed(self, move_A: bool, move_D: bool, dt: float):
         """A 减速 / D 加速 / 松手恢复，惩罚期间强制慢速"""
@@ -59,6 +61,8 @@ class World:
             coin.x -= self.scroll_speed * dt
         for obs in self.obstacles:
             obs.x -= self.scroll_speed * dt
+
+        self.total_scroll += self.scroll_speed * dt
 
         self.platforms = [p for p in self.platforms if p.right > 0]
         self.coins = [c for c in self.coins if c.right > 0]
@@ -94,7 +98,7 @@ class World:
         # 金币（25% 概率，且不能连续出现）
         if random.random() < COIN_PROB and self.series_ground and not self.find_coin:
             coin_x = newx + random.randint(10, 80)
-            coin_y = random.choice([self.ground_y - 20, self.ground_y - 100])
+            coin_y = random.choice([self.ground_y - 30, self.ground_y - 120])
             self.coins.append(pg.Rect(coin_x, coin_y, 12, 12))
             self.find_coin = True
         else:
@@ -102,10 +106,10 @@ class World:
 
         # 浮空平台（有坑和连续浮空时不生成）
         if random.random() < FLOAT_PROB and self.series_ground and self.series_float:
-            float_y = self.ground_y - 140
+            float_y = self.ground_y - 150
             float_x = newx + random.randint(20, 60)
             float_w = random.choice([300, 600])
-            self.platforms.append(pg.Rect(float_x, float_y, float_w, 20))
+            self.platforms.append(pg.Rect(float_x, float_y, float_w, SCROLL_H))
             self.series_float = False
         else:
             self.series_float = True
@@ -113,12 +117,12 @@ class World:
         # 障碍物（有坑和无金币生成时不生成）
         if random.random() < OBSTACLE_PROB and self.series_ground and not self.find_coin:
             obs_x = newx + random.randint(30, 70)
-            obs_y = self.ground_y - 30
-            self.obstacles.append(pg.Rect(obs_x, obs_y, 15, 30))
+            obs_y = self.ground_y - OBSTRUCTION_H
+            self.obstacles.append(pg.Rect(obs_x, obs_y, OBSTRUCTION_W, OBSTRUCTION_H))
             # 障碍物上方 50% 概率放金币作为挑战奖励
             if random.random() < COIN_ABOVE_OBS_PROB:
                 self.coins.append(
-                    pg.Rect(obs_x, self.ground_y - 100, 12, 12))
+                    pg.Rect(obs_x, self.ground_y - 120, 12, 12))
                 self.find_coin = True
 
     def check_collectibles(self, player_rect) -> tuple[int, int]:
@@ -168,10 +172,10 @@ class World:
     def draw(self, screen, camera_y: float):
         """绘制平台/金币/障碍物（屏幕坐标 = 世界坐标 - 摄像机偏移）"""
         for plat in self.platforms:
-            pg.draw.rect(screen, (0, 0, 0),
+            pg.draw.rect(screen, (90, 90, 90),
                          (plat.x, plat.y - camera_y, plat.width, plat.height))
         for coin in self.coins:
-            pg.draw.rect(screen, (255, 215, 0),
+            pg.draw.rect(screen, (255, 200, 60),
                          (coin.x, coin.y - camera_y, coin.width, coin.height))
         for obs in self.obstacles:
             pg.draw.rect(screen, (100, 100, 100),

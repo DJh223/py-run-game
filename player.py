@@ -83,5 +83,5 @@ class Player:
 
     def draw(self, screen, camera_y: float):
         """绘制玩家方块（屏幕坐标 = 世界坐标 - 摄像机偏移）"""
-        pg.draw.rect(screen, (178, 139, 213),
+        pg.draw.rect(screen, (162, 164, 165),
                      (int(self.x), int(self.y - camera_y), 40, 40))

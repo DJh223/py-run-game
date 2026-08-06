@@ -25,7 +25,8 @@
 - [x] 掉落不死（多层平台 + 弹簧摄像机 + 下落检测）
 - [x] 障碍物系统（减速惩罚 + 扣分）
 - [x] 粒子特效（摩擦尘土 + 落地爆发 + 金币闪光）
-- [ ] 视觉优化/音效 ← 下一步
+- [x] 背景系统（建模软件视口 + 网格滚动）
+- [ ] 音效系统 / 平台纹理 ← 下一步
 
 ## 核心物理参数
 
@@ -52,7 +53,9 @@
 - `player.py` — Player 类
 - `camera.py` — Camera 类
 - `world.py` — World 类
+- `background.py` — 背景系统
 - `particles.py` — 粒子系统
 - `demo/particle_demo.py` — 粒子演示
+- `demo/background_demo.py` — 背景演示
 - `tree_demo.py` — 树滚动原型（已归档）
 - `CLAUDE.md` — 本文件

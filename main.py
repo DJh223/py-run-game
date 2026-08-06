@@ -8,6 +8,7 @@ from player import Player
 from camera import Camera
 from world import World
 from particles import ParticleSystem
+from background import Background
 
 
 # ============================================================
@@ -29,6 +30,7 @@ player = Player()
 camera = Camera()
 world = World()
 particles = ParticleSystem()
+bg = Background(SCREEN_WIDTH, SCREEN_HEIGHT)
 
 was_grounded = True                                         # 上一帧地上否（检测落地瞬间）
 dust_timer = 0.0                                            # 摩擦粒子计时器
@@ -105,14 +107,14 @@ while running:
                 move_D = False
 
     # ---- 绘制 ----
-    screen.fill((255, 255, 255))
+    bg.draw(screen, world.total_scroll)
 
     player.draw(screen, camera.y)
     world.draw(screen, camera.y)
     particles.draw(screen, camera.y)
 
     # 分数（右上角）
-    figure = font.render(str(score), True, (255, 223, 127))
+    figure = font.render(str(score), True, (255, 255, 255))
     screen.blit(figure, (screen.get_width() - figure.get_width() - 10, 10))
 
     pg.display.flip()
