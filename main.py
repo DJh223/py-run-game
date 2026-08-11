@@ -2,6 +2,8 @@
 
 import pygame as pg
 import ctypes
+import win32gui
+import win32con
 
 from config import *
 from player import Player
@@ -9,7 +11,8 @@ from camera import Camera
 from world import World
 from particles import ParticleSystem
 from background import Background
-
+from game_ui import Game_ui
+from data import Data
 
 # ============================================================
 # 初始化
@@ -22,15 +25,19 @@ try:
 except Exception:
     pass
 
+info = pg.display.Info()
+native_w, native_h = info.current_w, info.current_h
+    
 screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pg.time.Clock()
-font = pg.font.Font(None, 36)                              # 分数字体
+font = pg.font.Font("C:/Windows/Fonts/msyh.ttc", 14)        # 微软雅黑
 
 player = Player()
 camera = Camera()
 world = World()
 particles = ParticleSystem()
 bg = Background(SCREEN_WIDTH, SCREEN_HEIGHT)
+gu = Game_ui(world, player)
 
 was_grounded = True                                         # 上一帧地上否（检测落地瞬间）
 dust_timer = 0.0                                            # 摩擦粒子计时器
@@ -41,6 +48,9 @@ move_D = False                                              # D 键是否按住
 
 running = True                                              # 主循环开关
 
+screen_w, screen_h = SCREEN_WIDTH, SCREEN_HEIGHT
+
+scale = screen_h / SCREEN_HEIGHT                            #缩放比例
 # ============================================================
 # 主循环
 # ============================================================
@@ -63,7 +73,7 @@ while running:
     if player.on_ground:
         dust_timer += dt
         if dust_timer > 0.06:
-            particles.spawn_friction(player.rect.centerx, player.rect.bottom)
+            particles.spawn_friction(player.rect.centerx, player.rect.bottom, PLAYER_SIZE)
             dust_timer = 0.0
     else:
         dust_timer = 0
@@ -94,25 +104,44 @@ while running:
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_ESCAPE:
                 running = False
-            elif event.key == pg.K_SPACE and player.on_ground:
+            elif event.key == pg.K_SPACE and player.on_ground and player.has_jump:
                 player.jump()
             elif event.key == pg.K_a:
                 move_A = True
             elif event.key == pg.K_d:
                 move_D = True
+            elif event.key == pg.K_F11:
+                if screen.get_flags() & pg.NOFRAME:
+                    screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))# 切回窗口
+                    hwnd = pg.display.get_wm_info()["window"]                  #获取窗口句柄
+                    win32gui.SetWindowPos(hwnd,win32con.HWND_TOP,
+                    (native_w-SCREEN_WIDTH)//2,
+                    (native_h-SCREEN_HEIGHT)//2,
+                    0,0,win32con.SWP_NOSIZE)        
+                    bg.resize(SCREEN_WIDTH, SCREEN_HEIGHT)    
+                else:
+                    screen = pg.display.set_mode((native_w, native_h), pg.NOFRAME)
+                    hwnd = pg.display.get_wm_info()["window"]
+                    win32gui.SetWindowPos(hwnd,win32con.HWND_TOP,0,0,native_w,native_h,0)
+                    bg.resize(native_w, native_h)                      # 全屏
         elif event.type == pg.KEYUP:
             if event.key == pg.K_a:
                 move_A = False
             elif event.key == pg.K_d:
                 move_D = False
+        
+    screen_w, screen_h = screen.get_size()
+    scale =  screen_h / SCREEN_HEIGHT               #缩放比例
+
 
     # ---- 绘制 ----
     bg.draw(screen, world.total_scroll)
 
-    player.draw(screen, camera.y)
-    world.draw(screen, camera.y)
-    particles.draw(screen, camera.y)
-
+    player.draw(screen, camera.y, scale)
+    world.draw(screen, camera.y, scale)
+    particles.draw(screen, camera.y, scale)
+    gu.draw(screen)
+    gu.title(screen, font)
     # 分数（右上角）
     figure = font.render(str(score), True, (255, 255, 255))
     screen.blit(figure, (screen.get_width() - figure.get_width() - 10, 10))

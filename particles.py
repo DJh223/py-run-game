@@ -3,8 +3,8 @@
 import pygame as pg
 import random
 import math
-
-
+from config import *
+from data import Data
 
 class Particle:
     def __init__(self, x, y, vx, vy, life, color, size):
@@ -33,12 +33,12 @@ class Particle:
         """透明度"""
         return max(0, int(255 * self.life / self.max_life))
 
-    def draw(self, screen, camera_y: float):
+    def draw(self, screen, camera_y: float, scale):
         size = self.size + 2
         surf = pg.Surface((size * 2,size * 2),pg.SRCALPHA)
         pg.draw.circle(surf, (*self.color, self.alpha), (size,size),
                         int(self.size * (0.3 + 0.7 * (self.life / self.max_life))))
-        screen.blit(surf, (int(self.x - size), int(self.y - size - camera_y)))
+        screen.blit(surf, (int(self.x - size) * scale, int(self.y - size - camera_y) * scale))
 
 
 class ParticleSystem :
@@ -57,13 +57,19 @@ class ParticleSystem :
                 Particle(x, y, vx, vy, life, color, size)
             )
 
-    def spawn_friction(self, x, bottom_y, block_width = 40):
+    def fade_color(self, base_rgb: list, scale:float) -> list:
+        r = max(0, int(base_rgb[0] * scale))
+        g = max(0, int(base_rgb[1] * scale))
+        b = max(0, int(base_rgb[2] * scale))
+        return[r, g, b]
+
+    def spawn_friction(self, x, bottom_y, block_width):
         '''地面摩擦粒子特效'''
-        half = block_width // 2 
+        half = block_width / 2 
         for _ in range(12):
             offset = random.uniform(-half, half)
             x_pos = x + offset
-            if offset < -12:
+            if offset < -half / 3:
                 self.emit(
                     count = 2,
                     x = x_pos,
@@ -71,10 +77,10 @@ class ParticleSystem :
                     speed_range = (10,40),
                     angle_range = (-math.pi * 37/36, -math.pi * 35/36),
                     life_range=(0.15, 0.3),
-                    color=(180, 160, 140),
+                    color=self.fade_color(WORLD_COLOR, 0.6),
                     size_range=(1, 2)
                 )
-            elif offset < 8:
+            elif offset < -half / 3:
                 self.emit(
                     count=3,
                     x=x_pos,
@@ -82,7 +88,7 @@ class ParticleSystem :
                     speed_range=(35, 80),
                     angle_range=(-math.pi * 35/36, -math.pi * 33/36),
                     life_range=(0.3, 0.4),
-                    color=(180, 160, 140),
+                    color=self.fade_color(WORLD_COLOR, 0.8),
                     size_range=(1, 2)
                 )    
 
@@ -94,7 +100,7 @@ class ParticleSystem :
                     speed_range=(40, 100),
                     angle_range=(-math.pi * 33/36, -math.pi * 5/6),   
                     life_range=(0.3, 0.6),
-                    color=(180, 160, 140),
+                    color=self.fade_color(WORLD_COLOR, 1),
                     size_range=(1, 3)
                 )
 
@@ -104,7 +110,7 @@ class ParticleSystem :
         """落地爆发粒子特效"""
         self.emit(
             count=10,
-            x=x, y=y,
+            x=x, y=y ,
             speed_range=(30, 120),
             angle_range=(0, 2 * math.pi),      # 所有方向
             life_range=(0.3, 0.7),
@@ -129,6 +135,6 @@ class ParticleSystem :
             p.update(dt)
         self.particles = [p for p in self.particles if p.alive]
 
-    def draw(self, screen, camera_y: float):
+    def draw(self, screen, camera_y: float, scale):
         for p in self.particles:
-            p.draw(screen,camera_y)
+            p.draw(screen,camera_y, scale)
