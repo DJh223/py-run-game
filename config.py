@@ -1,47 +1,82 @@
-SCREEN_WIDTH = 960
-SCREEN_HEIGHT = 540
-PLAYER_SIZE = 40
-PLAYER_START_X = int(SCREEN_WIDTH * 0.25)
-PLAYER_START_Y = int(SCREEN_HEIGHT * 0.78)
+# ============================================================
+# 屏幕
+# ============================================================
+SCREEN_WIDTH = 960                  # 窗口宽度
+SCREEN_HEIGHT = 540                 # 窗口高度
+PLAYER_SIZE = 40                    # 方块大小
+PLAYER_START_X = int(SCREEN_WIDTH * 0.25)                # 玩家初始 x
+PLAYER_START_Y = int(SCREEN_HEIGHT * 0.78)               # 玩家初始 y
 
-GRAVITY_NORMAL = 1500
-GRAVITY_MIN = 600
-GRAVITY_FADE = 3000
-BASE_JUMP = -600
-HOLD_THRESHOLD = 0.08
-MAX_FALL_SPEED = 900
+# ============================================================
+# 物理
+# ============================================================
+GRAVITY_NORMAL = 1500               # 重力加速度（像素/秒²）
+GRAVITY_MIN = 600                   # 长按最低降到这个值
+GRAVITY_FADE = 3000                 # 每秒重力减少 3000
+BASE_JUMP = -600                    # 跳跃力度（负值 = 向上）
+HOLD_THRESHOLD = 0.08               # 按住多少秒后才触发长按轻重力
+MAX_FALL_SPEED = 900                # 下落最大速度（像素/秒）
 
-SCROLL_SPEED_INIT = 200
-SCROLL_SPEED_NORMAL = 200
-SCROLL_SPEED_MIN = 80
-SCROLL_SPEED_MAX = 400
-SPEED_CHANGE = 200
-SPEED_PENALTY_DURATION = 0.5
-SPEED_OBS = 60
+# ============================================================
+# 平台速度
+# ============================================================
+SCROLL_SPEED_INIT = 200             # 初始滚动速度
+SCROLL_SPEED_NORMAL = 200           # 松手后平台的默认滚动速度
+SCROLL_SPEED_MIN = 80               # A 按到底的最低速度
+SCROLL_SPEED_MAX = 400              # D 按到底的最高速度
+SPEED_CHANGE = 200                  # 每秒速度变化量（控制渐变快慢）
+SPEED_PENALTY_DURATION = 0.5        # 减速惩罚持续秒数
+SPEED_OBS = 60                      # 减速惩罚速度
 
-PIT_SMALL_PROB = 0.2
-PIT_LARGE_PROB = 0.03
-PIT_SMALL_RANGE = (80, 150)
-PIT_LARGE_RANGE = (300, 480)
+# ============================================================
+# 坑洞
+# ============================================================
+PIT_SMALL_PROB = 0.2                # 小坑概率
+PIT_LARGE_PROB = 0.03               # 大坑概率
+PIT_SMALL_RANGE = (80, 150)         # 小坑宽度范围（短按可过）
+PIT_LARGE_RANGE = (300, 480)        # 大坑宽度范围（需长按）
 
-STIFFNESS = 6
-DAMPING = 5
-DEAD_ZONE = PLAYER_START_Y
+# ============================================================
+# 摄像机
+# ============================================================
+STIFFNESS = 6                       # 弹簧刚度（越大追得越快）
+DAMPING = 5                         # 阻尼（越大越稳）
+DEAD_ZONE = PLAYER_START_Y          # 死区（玩家在范围内不拉动相机）
 
-FALL_DURATION = 0.3
+# ============================================================
+# 掉落
+# ============================================================
+FALL_DURATION = 0.3                 # 掉多久才生成新层（秒）
 
-PIXEL_PER_SCORE = 10
-COIN_SCORE = 500
-OBSTACLE_PENALTY = 500
+# ============================================================
+# 分数
+# ============================================================
+PIXEL_PER_SCORE = 10                # 每跑多少像素得 1 分
+COIN_SCORE = 500                    # 金币加分（额外距离）
+OBSTACLE_PENALTY = 500              # 障碍物扣分（减距离）
 
-COIN_PROB = 0.40
-FLOAT_PROB = 0.01
-OBSTACLE_PROB = 0.10
-COIN_ABOVE_OBS_PROB = 0.50
+# ============================================================
+# 生成概率
+# ============================================================
+COIN_PROB = 0.40                    # 金币生成概率
+FLOAT_PROB = 0.01                   # 浮空平台生成概率
+OBSTACLE_PROB = 0.10                # 障碍物生成概率
+COIN_ABOVE_OBS_PROB = 0.50          # 障碍物上方生成金币概率
 
-OBSTRUCTION_W = 30
-OBSTRUCTION_H = 70
+# ============================================================
+# 障碍物
+# ============================================================
+OBSTRUCTION_W = 30     #障碍物宽
+OBSTRUCTION_H = 70     #障碍物高
 
-SCROLL_W = 100
-SCROLL_H = 20
-WORLD_COLOR = (255, 255, 255)
+# ============================================================
+# 平台
+# ============================================================
+SCROLL_W = 100         #平台宽
+SCROLL_H = 20          #平台高
+WORLD_COLOR = (255, 255, 255)       #世界颜色
+
+
+
+
+
