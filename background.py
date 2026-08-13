@@ -2,8 +2,8 @@
 
 import pygame as pg
 
-GRID_FINE = 8                       # 细网格间距
-GRID_MAJOR = 80                     # 粗网格间距（方块 40 的两倍）
+GRID_FINE = 8
+GRID_MAJOR = 80
 
 
 class Background:
@@ -11,7 +11,6 @@ class Background:
         self.resize(w, h)
 
     def resize(self, w, h):
-        """全屏切换时重建预渲染画布"""
         self.bg_surf = pg.Surface((w, h))
         self.bg_surf.fill((63, 63, 63))
 
@@ -28,6 +27,5 @@ class Background:
     def draw(self, screen, scroll_offset=0):
         ox = scroll_offset % GRID_MAJOR
         screen.blit(self.bg_surf, (0, 0))
-        # 双图补位实现无缝横向滚动
         screen.blit(self.grid_surf, (-ox, 0))
         screen.blit(self.grid_surf, (screen.get_width() - ox, 0))

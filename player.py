@@ -24,7 +24,6 @@ class Player:
         self.has_bigjump = True
 
     def apply_gravity(self, dt: float):
-        """空中累加重力；长按触发后重力渐变降低"""
         if not self.has_gravity or self.on_ground:
             return
 
@@ -40,7 +39,6 @@ class Player:
             self.vy = MAX_FALL_SPEED
 
     def update_and_land(self, platforms: list, dt: float):
-        """更新 y 位置，穿越法检测落地。返回 (on_ground, collision_ground)"""
         self.old_bottom = self.rect.bottom
         self.y += self.vy * dt
         self.rect.y = int(self.y)
@@ -49,7 +47,6 @@ class Player:
         collision_ground = False
 
         for plat in platforms:
-            # 穿越法：本帧脚底从平台表面上方穿到下方 = 落地
             if (self.old_bottom <= plat.top
                     and self.rect.bottom >= plat.top
                     and self.vy >= 0
@@ -74,7 +71,6 @@ class Player:
         self.hold_triggered = False
 
     def update_long_press(self, keys, dt: float):
-        """空中按住空格超过阈值 → 开启轻重力"""
         if not self.on_ground and keys[pg.K_SPACE] and self.can_hold and self.has_bigjump:
             self.hold_time += dt
             if self.hold_time >= HOLD_THRESHOLD and not self.hold_triggered:
@@ -86,7 +82,6 @@ class Player:
                 self.can_hold = False
 
     def draw(self, screen, camera_y: float, scale):
-        """屏幕坐标 = 世界坐标 × scale - 摄像机偏移"""
         pg.draw.rect(screen, (162, 164, 165),
                      (int(self.x) * scale, int(self.y - camera_y) * scale,
                       PLAYER_SIZE * scale, PLAYER_SIZE * scale))

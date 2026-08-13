@@ -25,12 +25,10 @@ class World:
         self._rightmost = 1000
         self.total_scroll = 0.0
 
-        # 初始连续地面
         for i in range(10):
             self.platforms.append(pg.Rect(i * SCROLL_W, self.ground_y, SCROLL_W + 3, SCROLL_H))
 
     def update_speed(self, move_A: bool, move_D: bool, dt: float):
-        """A 减速 / D 加速 / 松手恢复；惩罚期间强制慢速"""
         if self.speed_penalty > 0:
             self.speed_penalty -= dt
             self.scroll_speed = SPEED_OBS
@@ -53,7 +51,6 @@ class World:
                 self.scroll_speed = target
 
     def scroll_all(self, dt: float):
-        """所有物体向左滚动，移出左边界后删除"""
         for plat in self.platforms:
             plat.x -= self.scroll_speed * dt
         for coin in self.coins:
@@ -68,7 +65,6 @@ class World:
         self.obstacles = [o for o in self.obstacles if o.right > 0]
 
     def generate_ground(self, screen_w: int):
-        """生成地面平台、金币、浮空平台、障碍物"""
         ground_plat = [p for p in self.platforms if p.y == self.ground_y]
         if ground_plat:
             self._rightmost = max(p.right for p in ground_plat)
@@ -113,13 +109,11 @@ class World:
             obs_x = newx + random.randint(30, 70)
             obs_y = self.ground_y - OBSTRUCTION_H
             self.obstacles.append(pg.Rect(obs_x, obs_y, OBSTRUCTION_W, OBSTRUCTION_H))
-            # 障碍物上方有概率放金币作为跳过奖励
             if random.random() < COIN_ABOVE_OBS_PROB:
                 self.coins.append(pg.Rect(obs_x, self.ground_y - 120, 12, 12))
                 self.find_coin = True
 
     def check_collectibles(self, player_rect) -> tuple[int, int]:
-        """检测金币/障碍物碰撞。返回 (加距离, 减距离)"""
         add_dist = 0
         sub_dist = 0
 
@@ -138,7 +132,6 @@ class World:
 
     def update_falling(self, player_y: float, player_vy: float,
                        on_ground: bool, dt: float, player_x: float):
-        """坠落检测 + 生成下层平台。返回 (falling, 是否生成了新层)"""
         self.falling = player_y >= self.ground_y and not on_ground
 
         if not on_ground and player_vy > 0 and player_y > self.ground_y:
@@ -148,7 +141,6 @@ class World:
 
         new_layer = False
         if self.falling_timer > FALL_DURATION and player_y > self.ground_y:
-            # 掉出当前层 → 脚下生成新一层（掉落不死）
             self.ground_y = int(player_y + SCREEN_HEIGHT)
             self.obstacles.clear()
             self.coins.clear()

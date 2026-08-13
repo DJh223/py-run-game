@@ -14,12 +14,8 @@ from background import Background
 from game_ui import Game_ui
 from data import Data
 
-# ============================================================
-# 初始化
-# ============================================================
 pg.init()
 
-# 锁定中文输入法，防止字母键被拦截
 try:
     ctypes.windll.imm32.ImmDisableIME(-1)
 except Exception:
@@ -50,14 +46,10 @@ running = True
 
 scale = SCREEN_HEIGHT / SCREEN_HEIGHT
 
-# ============================================================
-# 主循环
-# ============================================================
 while running:
     dt = clock.tick(120) / 1000
     dtime += dt
 
-    # ---- 更新 ----
     player.apply_gravity(dt)
     world.update_speed(move_A, move_D, dt)
     world.scroll_all(dt)
@@ -96,7 +88,6 @@ while running:
     distance += world.scroll_speed * dt
     score = int(distance / PIXEL_PER_SCORE)
 
-    # ---- 事件 ----
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
@@ -111,7 +102,6 @@ while running:
                 move_D = True
             elif event.key == pg.K_F11:
                 if screen.get_flags() & pg.NOFRAME:
-                    # 切回窗口并居中
                     screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
                     hwnd = pg.display.get_wm_info()["window"]
                     win32gui.SetWindowPos(hwnd, win32con.HWND_TOP,
@@ -120,7 +110,6 @@ while running:
                                           0, 0, win32con.SWP_NOSIZE)
                     bg.resize(SCREEN_WIDTH, SCREEN_HEIGHT)
                 else:
-                    # 无边框全屏
                     screen = pg.display.set_mode((native_w, native_h), pg.NOFRAME)
                     hwnd = pg.display.get_wm_info()["window"]
                     win32gui.SetWindowPos(hwnd, win32con.HWND_TOP, 0, 0,
@@ -135,7 +124,6 @@ while running:
     screen_w, screen_h = screen.get_size()
     scale = screen_h / SCREEN_HEIGHT
 
-    # ---- 绘制 ----
     bg.draw(screen, world.total_scroll)
 
     player.draw(screen, camera.y, scale)

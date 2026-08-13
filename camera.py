@@ -10,7 +10,6 @@ class Camera:
 
     def follow(self, player_y: float, player_vy: float, falling: bool, dt: float):
         if falling:
-            # 预测落点，空中无死区
             lead = player_vy * 0.15
             target_y = player_y + lead - int(SCREEN_HEIGHT * 0.55)
             current_dead = 0

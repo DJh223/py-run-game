@@ -29,7 +29,6 @@ class Particle:
 
     @property
     def alpha(self) -> int:
-        """剩余生命比例 → 0~255 透明度"""
         return max(0, int(255 * self.life / self.max_life))
 
     def draw(self, screen, camera_y: float, scale):
@@ -46,7 +45,6 @@ class ParticleSystem:
         self.particles = []
 
     def emit(self, count, x, y, speed_range, angle_range, life_range, color, size_range):
-        """通用发射器：角度+速度经三角函数拆分为 vx/vy"""
         for _ in range(count):
             angle = random.uniform(*angle_range)
             speed = random.uniform(*speed_range)
@@ -63,7 +61,6 @@ class ParticleSystem:
         return [r, g, b]
 
     def spawn_friction(self, x, bottom_y, block_width):
-        """底面摩擦尘土：沿接触面随机撒落，后半段多、前半段少"""
         half = block_width / 2
         for _ in range(12):
             offset = random.uniform(-half, half)
@@ -100,7 +97,6 @@ class ParticleSystem:
                 )
 
     def spawn_landing(self, x, y):
-        """落地爆发：圆形散射"""
         self.emit(
             count=10,
             x=x, y=y,
@@ -112,7 +108,6 @@ class ParticleSystem:
         )
 
     def spawn_coin_sparkle(self, x, y):
-        """金币闪光：向上飞散的金色粒子"""
         self.emit(
             count=6,
             x=x, y=y,

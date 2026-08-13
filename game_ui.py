@@ -14,7 +14,6 @@ class Game_ui:
         self.player = player_obj
 
     def title(self, screen, font):
-        """面板标题 + 属性列表（活跃白色 / 未激活暗灰）"""
         title = font.render("属性", True, (255, 255, 255))
         screen.blit(title, (self.panel_x + 8, self.panel_y + 6))
 
