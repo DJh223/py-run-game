@@ -5,32 +5,32 @@ import random
 from config import *
 from data import Data
 
+
 class World:
     def __init__(self):
-        self.platforms = []                                 # 所有平台列表
-        self.coins = []                                     # 金币列表
-        self.obstacles = []                                 # 障碍物列表
+        self.platforms = []
+        self.coins = []
+        self.obstacles = []
 
-        self.ground_y = PLAYER_START_Y + PLAYER_SIZE        # 当前地面层 y 坐标
-        self.scroll_speed = float(SCROLL_SPEED_INIT)        # 当前滚动速度
-        self.speed_penalty = 0.0                            # 减速惩罚剩余时间
+        self.ground_y = PLAYER_START_Y + PLAYER_SIZE
+        self.scroll_speed = float(SCROLL_SPEED_INIT)
+        self.speed_penalty = 0.0
 
-        self.series_ground = True                           # 防连续坑的标记
-        self.series_float = True                            # 防连续浮空平台的标记
-        self.find_coin = False                              # 上一帧是否生了金币
-        self.falling = False                                # 是否正在坠落（非跳跃）
-        self.falling_timer = 0.0                            # 累计坠落时间
+        self.series_ground = True
+        self.series_float = True
+        self.find_coin = False
+        self.falling = False
+        self.falling_timer = 0.0
 
-        self._rightmost = 1000                              # 当前最右边平台的右边缘
-
+        self._rightmost = 1000
         self.total_scroll = 0.0
 
-        # 初始生成 10 个连续地面平台
+        # 初始连续地面
         for i in range(10):
             self.platforms.append(pg.Rect(i * SCROLL_W, self.ground_y, SCROLL_W + 3, SCROLL_H))
 
     def update_speed(self, move_A: bool, move_D: bool, dt: float):
-        """A 减速 / D 加速 / 松手恢复，惩罚期间强制慢速"""
+        """A 减速 / D 加速 / 松手恢复；惩罚期间强制慢速"""
         if self.speed_penalty > 0:
             self.speed_penalty -= dt
             self.scroll_speed = SPEED_OBS
@@ -43,7 +43,6 @@ class World:
         else:
             target = float(SCROLL_SPEED_NORMAL)
 
-        # 渐变到目标速度
         if self.scroll_speed < target:
             self.scroll_speed += SPEED_CHANGE * dt
             if self.scroll_speed > target:
@@ -70,7 +69,6 @@ class World:
 
     def generate_ground(self, screen_w: int):
         """生成地面平台、金币、浮空平台、障碍物"""
-        # 计算当前地面层最右边位置
         ground_plat = [p for p in self.platforms if p.y == self.ground_y]
         if ground_plat:
             self._rightmost = max(p.right for p in ground_plat)
@@ -80,22 +78,20 @@ class World:
         if self._rightmost >= screen_w + 100:
             return
 
-        # 坑洞 or 连续
         dice = random.random()
         if dice < PIT_SMALL_PROB and self.series_ground:
             if dice < PIT_LARGE_PROB:
-                newx = self._rightmost + random.randint(*PIT_LARGE_RANGE)   # 大坑
+                newx = self._rightmost + random.randint(*PIT_LARGE_RANGE)
             else:
-                newx = self._rightmost + random.randint(*PIT_SMALL_RANGE)   # 小坑
+                newx = self._rightmost + random.randint(*PIT_SMALL_RANGE)
             self.series_ground = False
         else:
-            newx = self._rightmost                                 # 紧贴
+            newx = self._rightmost
             self.series_ground = True
 
         newx = int(newx)
         self.platforms.append(pg.Rect(newx - 3, self.ground_y, SCROLL_W, SCROLL_H))
 
-        # 金币（25% 概率，且不能连续出现）
         if random.random() < COIN_PROB and self.series_ground and not self.find_coin:
             coin_x = newx + random.randint(10, 80)
             coin_y = random.choice([self.ground_y - 30, self.ground_y - 120])
@@ -104,7 +100,6 @@ class World:
         else:
             self.find_coin = False
 
-        # 浮空平台（有坑和连续浮空时不生成）
         if random.random() < FLOAT_PROB and self.series_ground and self.series_float:
             float_y = self.ground_y - 150
             float_x = newx + random.randint(20, 60)
@@ -114,15 +109,13 @@ class World:
         else:
             self.series_float = True
 
-        # 障碍物（有坑和无金币生成时不生成）
         if random.random() < OBSTACLE_PROB and self.series_ground and not self.find_coin:
             obs_x = newx + random.randint(30, 70)
             obs_y = self.ground_y - OBSTRUCTION_H
             self.obstacles.append(pg.Rect(obs_x, obs_y, OBSTRUCTION_W, OBSTRUCTION_H))
-            # 障碍物上方 50% 概率放金币作为挑战奖励
+            # 障碍物上方有概率放金币作为跳过奖励
             if random.random() < COIN_ABOVE_OBS_PROB:
-                self.coins.append(
-                    pg.Rect(obs_x, self.ground_y - 120, 12, 12))
+                self.coins.append(pg.Rect(obs_x, self.ground_y - 120, 12, 12))
                 self.find_coin = True
 
     def check_collectibles(self, player_rect) -> tuple[int, int]:
@@ -145,20 +138,18 @@ class World:
 
     def update_falling(self, player_y: float, player_vy: float,
                        on_ground: bool, dt: float, player_x: float):
-        """检测坠落状态，生成下层平台。返回 (falling, 是否生成了新层)"""
-        # 坠落 = 在 ground_y 下方且没有平台支撑
+        """坠落检测 + 生成下层平台。返回 (falling, 是否生成了新层)"""
         self.falling = player_y >= self.ground_y and not on_ground
 
-        # 坠落计时
         if not on_ground and player_vy > 0 and player_y > self.ground_y:
             self.falling_timer += dt
         else:
             self.falling_timer = 0
 
-        # 超时 + 确认在下方 → 生成新层
         new_layer = False
         if self.falling_timer > FALL_DURATION and player_y > self.ground_y:
-            self.ground_y = int(player_y + SCREEN_HEIGHT )             # 新地面
+            # 掉出当前层 → 脚下生成新一层（掉落不死）
+            self.ground_y = int(player_y + SCREEN_HEIGHT)
             self.obstacles.clear()
             self.coins.clear()
             for i in range(12):
@@ -170,13 +161,15 @@ class World:
         return self.falling, new_layer
 
     def draw(self, screen, camera_y: float, scale):
-        """绘制平台/金币/障碍物（屏幕坐标 = 世界坐标 - 摄像机偏移）"""
         for plat in self.platforms:
             pg.draw.rect(screen, WORLD_COLOR,
-                         (plat.x * scale, (plat.y - camera_y) * scale, plat.width * scale, plat.height * scale))
+                         (plat.x * scale, (plat.y - camera_y) * scale,
+                          plat.width * scale, plat.height * scale))
         for coin in self.coins:
             pg.draw.rect(screen, (255, 200, 60),
-                         (coin.x * scale, (coin.y - camera_y) * scale, coin.width * scale, coin.height * scale))
+                         (coin.x * scale, (coin.y - camera_y) * scale,
+                          coin.width * scale, coin.height * scale))
         for obs in self.obstacles:
             pg.draw.rect(screen, (100, 100, 100),
-                         (obs.x * scale, (obs.y - camera_y) * scale, obs.width * scale, obs.height * scale))
+                         (obs.x * scale, (obs.y - camera_y) * scale,
+                          obs.width * scale, obs.height * scale))

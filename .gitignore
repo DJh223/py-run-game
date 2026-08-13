@@ -5,4 +5,4 @@ __pycache__/
 # 本地开发文件
 CLAUDE.md
 备份/
-demo/
+demo/.claude/
