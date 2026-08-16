@@ -3,14 +3,13 @@
 import pygame as pg
 import random
 from config import *
-from data import Data
 
 class World:
     def __init__(self):
         self.platforms = []                                 # 所有平台列表
         self.coins = []                                     # 金币列表
         self.obstacles = []                                 # 障碍物列表
-
+        self.fragments = []                                 # 碎片列表        
         self.ground_y = PLAYER_START_Y + PLAYER_SIZE        # 当前地面层 y 坐标
         self.scroll_speed = float(SCROLL_SPEED_INIT)        # 当前滚动速度
         self.speed_penalty = 0.0                            # 减速惩罚剩余时间
@@ -27,7 +26,7 @@ class World:
 
         # 初始生成 10 个连续地面平台
         for i in range(10):
-            self.platforms.append(pg.Rect(i * SCROLL_W, self.ground_y, SCROLL_W + 3, SCROLL_H))
+            self.platforms.append(pg.Rect(i * SCROLL_W, self.ground_y, SCROLL_W , SCROLL_H))
 
     def update_speed(self, move_A: bool, move_D: bool, dt: float):
         """A 减速 / D 加速 / 松手恢复，惩罚期间强制慢速"""
@@ -163,7 +162,7 @@ class World:
             self.coins.clear()
             for i in range(12):
                 self.platforms.append(
-                    pg.Rect(int(player_x) - 400 + i * SCROLL_W, self.ground_y, SCROLL_W + 3, SCROLL_H))
+                    pg.Rect(int(player_x) - 400 + i * SCROLL_W, self.ground_y, SCROLL_W, SCROLL_H))
             self.falling_timer = 0
             new_layer = True
 

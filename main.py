@@ -12,7 +12,6 @@ from world import World
 from particles import ParticleSystem
 from background import Background
 from game_ui import Game_ui
-from data import Data
 
 # ============================================================
 # 初始化

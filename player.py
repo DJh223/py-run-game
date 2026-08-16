@@ -2,7 +2,6 @@
 
 import pygame as pg
 from config import *
-from data import Data
 
 class Player:
     def __init__(self, x=PLAYER_START_X, y=PLAYER_START_Y):
@@ -18,9 +17,9 @@ class Player:
         self.hold_time = 0.0                                # 当前按住累计时长（秒）
         self.hold_triggered = False                         # 这一跳是否已经开启了轻重力
 
-        self.has_gravity = True                            # 重力开关
-        self.has_jump = True                               # 跳跃开关
-        self.has_bigjump = True                            # 大跳开关
+        self.has_gravity = False                           # 重力开关
+        self.has_jump = False                               # 跳跃开关
+        self.has_bigjump = False                            # 大跳开关
 
 
     def apply_gravity(self, dt: float):

@@ -1,0 +1,19 @@
+{
+    "skills": {
+        "gravity": {
+            "name": "Gravity",
+            "prerequisite": null,                            
+            "category": "movement",
+            "default_value": 1500,
+            "ui_text": "重力: ON, {value}"
+        },
+        "jump": {
+            "name": "Jump",
+            "prerequisite": null,
+            "category":"movement",
+            "default_value": null,
+            "ui_text": "跳跃: ON"
+        },
+        
+    }
+}

@@ -4,7 +4,6 @@ import pygame as pg
 import random
 import math
 from config import *
-from data import Data
 
 class Particle:
     def __init__(self, x, y, vx, vy, life, color, size):
