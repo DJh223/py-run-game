@@ -11,7 +11,9 @@ from camera import Camera
 from world import World
 from particles import ParticleSystem
 from background import Background
-from game_ui import Game_ui
+from UI.game_ui import Game_ui
+from UI.menu_ui import Menu_ui
+from feature.manager import StateManager
 
 # ============================================================
 # 初始化
@@ -36,7 +38,7 @@ camera = Camera()
 world = World()
 particles = ParticleSystem()
 bg = Background(SCREEN_WIDTH, SCREEN_HEIGHT)
-gu = Game_ui(world, player)
+state_mgr = StateManager("data/state.json")
 
 was_grounded = True                                         # 上一帧地上否（检测落地瞬间）
 dust_timer = 0.0                                            # 摩擦粒子计时器
@@ -50,6 +52,11 @@ running = True                                              # 主循环开关
 screen_w, screen_h = SCREEN_WIDTH, SCREEN_HEIGHT
 
 scale = screen_h / SCREEN_HEIGHT                            #缩放比例
+gu = Game_ui(world, player)
+mu = Menu_ui(scale)
+
+in_menu = True        # True = 显示菜单，False = 游戏中
+
 # ============================================================
 # 主循环
 # ============================================================
@@ -58,9 +65,11 @@ while running:
     dtime += dt
 
     # ---- 更新 ----
-    player.apply_gravity(dt)
+    if state_mgr.is_active("gravity"):
+        player.apply_gravity(dt)
     world.update_speed(move_A, move_D, dt)
-    world.scroll_all(dt)
+    if state_mgr.is_active("velocity"):
+        world.scroll_all(dt)
     world.generate_ground(screen.get_width())
     was_grounded = player.on_ground
 
@@ -71,7 +80,7 @@ while running:
 
     if player.on_ground:
         dust_timer += dt
-        if dust_timer > 0.06:
+        if dust_timer > 0.06 and state_mgr.is_active("velocity"):
             particles.spawn_friction(player.rect.centerx, player.rect.bottom, PLAYER_SIZE)
             dust_timer = 0.0
     else:
@@ -81,7 +90,8 @@ while running:
         player.y, player.vy, player.on_ground, dt, player.x)
 
     keys = pg.key.get_pressed()
-    player.update_long_press(keys, dt)
+    if state_mgr.is_active("big_jump"):
+        player.update_long_press(keys, dt)
     camera.follow(player.y, player.vy, falling, dt)
 
     particles.update(dt)
@@ -94,6 +104,8 @@ while running:
     if distance < 0:
         distance = 0
     distance += world.scroll_speed * dt
+    if not state_mgr.is_active("velocity"):
+        distance = 0
     score = int(distance / PIXEL_PER_SCORE)
 
     # ---- 事件 ----
@@ -103,7 +115,7 @@ while running:
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_ESCAPE:
                 running = False
-            elif event.key == pg.K_SPACE and player.on_ground and player.has_jump:
+            elif event.key == pg.K_SPACE and player.on_ground and state_mgr.is_active("jump"):
                 player.jump()
             elif event.key == pg.K_a:
                 move_A = True
@@ -128,6 +140,10 @@ while running:
                 move_A = False
             elif event.key == pg.K_d:
                 move_D = False
+        elif event.type == pg.MOUSEBUTTONDOWN:
+            if mu.button_rect.collidepoint(event.pos):
+                in_menu = False
+                state_mgr.unlocked.add("velocity")
         
     screen_w, screen_h = screen.get_size()
     scale =  screen_h / SCREEN_HEIGHT               #缩放比例
@@ -141,6 +157,8 @@ while running:
     particles.draw(screen, camera.y, scale)
     gu.draw(screen)
     gu.title(screen, font)
+    if in_menu:
+        mu.draw(screen, font)
     # 分数（右上角）
     figure = font.render(str(score), True, (255, 255, 255))
     screen.blit(figure, (screen.get_width() - figure.get_width() - 10, 10))

@@ -14,8 +14,9 @@ GRAVITY_NORMAL = 1500               # 重力加速度（像素/秒²）
 GRAVITY_MIN = 600                   # 长按最低降到这个值
 GRAVITY_FADE = 3000                 # 每秒重力减少 3000
 BASE_JUMP = -600                    # 跳跃力度（负值 = 向上）
-HOLD_THRESHOLD = 0.08               # 按住多少秒后才触发长按轻重力
+HOLD_THRESHOLD = 0.2                # 按住多少秒后才触发长按轻重力
 MAX_FALL_SPEED = 900                # 下落最大速度（像素/秒）
+HOLD_BOOST = -1000                   # 长按过程中持续施力
 
 # ============================================================
 # 平台速度
@@ -75,6 +76,7 @@ OBSTRUCTION_H = 70     #障碍物高
 SCROLL_W = 100         #平台宽
 SCROLL_H = 20          #平台高
 WORLD_COLOR = (255, 255, 255)       #世界颜色
+
 
 
 

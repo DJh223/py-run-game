@@ -19,15 +19,12 @@ class Game_ui:
         screen.blit(title, (self.panel_x + 8, self.panel_y + 6))
         # 属性列表
         attrs = [
-            ("速度", f"{self.world.scroll_speed:.0f}", True),
-            ("重力", f"{self.player.g_current:.0f}" if self.player.has_gravity else "OFF", self.player.has_gravity),
-            ("跳跃", "ON" if self.player.has_jump else "OFF", self.player.has_jump),
-            ("大跳", "ON" if self.player.has_bigjump else "OFF", self.player.has_bigjump),
+            
         ]        
 
         y_offset = self.panel_y + 30
         for name, value, active in attrs:
-            color = (255, 255, 255) if active else (100, 100, 100)   # 活跃=终端绿，不活跃=暗灰
+            color = (255, 255, 255) if active else (100, 100, 100)  
             text = font.render(f"{name}: {value}", True, color)
             screen.blit(text, (self.panel_x + 10, y_offset))
             y_offset += 22

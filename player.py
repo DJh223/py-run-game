@@ -11,31 +11,19 @@ class Player:
         self.rect = pg.Rect(int(self.x), int(self.y), PLAYER_SIZE, PLAYER_SIZE)  # 碰撞/绘制用 Rect
         self.old_bottom = self.rect.bottom                  # 上一帧脚底位置（穿越检测用）
 
-        self.g_current = float(GRAVITY_NORMAL)              # 当前重力（可变，长按时渐变降低）
         self.on_ground = True                               # 是否站在平台上
         self.can_hold = True                                # 这一跳是否还允许长按
         self.hold_time = 0.0                                # 当前按住累计时长（秒）
-        self.hold_triggered = False                         # 这一跳是否已经开启了轻重力
 
-        self.has_gravity = False                           # 重力开关
-        self.has_jump = False                               # 跳跃开关
-        self.has_bigjump = False                            # 大跳开关
+
+
 
 
     def apply_gravity(self, dt: float):
-        """空中时累加重力，长按触发后重力渐变降低"""
-        if not self.has_gravity: return
+        """空中时加重力"""
         if self.on_ground:
             return
-
-        if self.hold_triggered:
-            self.g_current -= GRAVITY_FADE * dt
-            if self.g_current < GRAVITY_MIN:
-                self.g_current = GRAVITY_MIN
-        else:
-            self.g_current = float(GRAVITY_NORMAL)
-
-        self.vy += self.g_current * dt
+        self.vy += GRAVITY_NORMAL * dt
         if self.vy > MAX_FALL_SPEED:
             self.vy = MAX_FALL_SPEED
 
@@ -72,17 +60,16 @@ class Player:
         self.on_ground = False
         self.can_hold = True
         self.hold_time = 0.0
-        self.hold_triggered = False
 
     def update_long_press(self, keys, dt: float):
-        """空中按住空格超过阈值 → 开启轻重力"""
-        if not self.on_ground and keys[pg.K_SPACE] and self.can_hold and self.has_bigjump:
-            self.hold_time += dt
-            if self.hold_time >= HOLD_THRESHOLD and not self.hold_triggered:
-                self.hold_triggered = True
+        """长按持续跳跃"""
+        if not self.on_ground and keys[pg.K_SPACE] and self.can_hold :
+            
+            if self.hold_time <= HOLD_THRESHOLD:
+                self.hold_time += dt
+                self.vy += HOLD_BOOST * dt
         else:
             self.hold_time = 0.0
-            self.g_current = float(GRAVITY_NORMAL)
             if not keys[pg.K_SPACE]:
                 self.can_hold = False               # 空中松手，这一跳不能再长按
 
